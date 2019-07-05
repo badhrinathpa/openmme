@@ -44,7 +44,7 @@ endif
 
 INCS := $(INC_DIRS)
 
-LIBS := -lpthread -lcrypto
+LIBS := -lpthread -lcrypto -lthreadpool -lusock
 #-L$(LIB_PATH) -ls6a
 
 $(TARGET): $(OBJECTS)

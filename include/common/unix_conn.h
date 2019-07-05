@@ -15,26 +15,25 @@
  * limitations under the License.
  */
 
-#ifndef __S1AP_SCTP_CONN_H_
-#define __S1AP_SCTP_CONN_H_
+#ifndef __UNIX_CONN_H_
+#define __UNIX_CONN_H_
 
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <netinet/sctp.h>
 
-#define MAX_STREAM 5
 #define MAX_PENDING_CONN 5
-#define ENB_PORT 62324
+#define BUF_SIZE 1024
 
-int create_sctp_socket(unsigned int remote_ip, unsigned short port);
+int create_unix_socket();
 
-int accept_sctp_socket(int sockfd);
+int accept_unix_socket(int sockfd);
 
-int recv_sctp_msg(int sockfd, unsigned char *buf, size_t len);
+int recv_unix_msg(int sockfd, unsigned char *buf, size_t len);
 
-int send_sctp_msg(int connSock, unsigned char *buffer, size_t len, uint16_t stream_no);
+int send_unix_msg(int sockfd, unsigned char *buf, size_t len);
 
-int close_sctp_socket(int sockfd);
+int close_unix_socket(int sockfd);
 
-#endif /*__S1AP_SCTP_CONN_H*/
+#endif /*__UNIX_CONN_H*/
