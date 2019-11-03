@@ -52,13 +52,13 @@ s1_auth_resp_handler(struct proto_IE *s1_auth_resp_ies)
 
 	/*Create Q structure for stage 1 to MME.
 	  contains init UE information.*/
-	auth_resp.ue_idx = s1_auth_resp_ies->data[0].mme_ue_s1ap_id;
-	if(s1_auth_resp_ies->data[2].nas.header.message_type != NAS_AUTH_RESP)
+	auth_resp.ue_idx = s1_auth_resp_ies->data[0].val.mme_ue_s1ap_id;
+	if(s1_auth_resp_ies->data[2].val.nas.header.message_type != NAS_AUTH_RESP)
 		auth_resp.status = S1AP_AUTH_FAILED;//Error in authentication
 	else
 		auth_resp.status = SUCCESS;
 
-	memcpy(&(auth_resp.res), &(s1_auth_resp_ies->data[2].nas.elements[0].auth_resp),
+	memcpy(&(auth_resp.res), &(s1_auth_resp_ies->data[2].val.nas.elements[0].auth_resp),
 		sizeof(struct XRES));
 
 	//STIMER_GET_CURRENT_TP(g_attach_stats[s1_auth_resp_ies->data[1].enb_ue_s1ap_id].auth_to_mme);

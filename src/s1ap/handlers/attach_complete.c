@@ -48,7 +48,7 @@ s1_attach_complete_handler(struct proto_IE *s1_esm_resp_ies)
 
 	/*Create Q structure for stage 1 to MME.
 	  contains init UE information.*/
-	attach_complete.ue_idx = s1_esm_resp_ies->data[0].mme_ue_s1ap_id;
+	attach_complete.ue_idx = s1_esm_resp_ies->data[0].val.mme_ue_s1ap_id;
 	attach_complete.status = SUCCESS;
 
 	int i = write_ipc_channel(ipcHndl_attachomplete, (char *)&attach_complete, S1AP_ATT_COMP_STAGE8_BUF_SIZE);

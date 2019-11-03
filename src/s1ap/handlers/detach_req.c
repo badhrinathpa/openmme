@@ -54,9 +54,9 @@ detach_stage1_handler(struct proto_IE *detach_ies, bool retransmit)
 	 * MME UE S1AP Id as M-TMSI.
 	 */
 	if (!retransmit)
-		req.ue_idx = detach_ies->data[0].mme_ue_s1ap_id;
+		req.ue_idx = detach_ies->data[0].val.mme_ue_s1ap_id;
 	else
-		req.ue_idx = ntohl(detach_ies->data[1].nas.elements[0].mi_guti.m_TMSI);
+		req.ue_idx = ntohl(detach_ies->data[1].val.nas.elements[0].mi_guti.m_TMSI);
 
 	write_ipc_channel(ipcHndl_detach, (char *)&req, S1AP_DETACHREQ_STAGE1_BUF_SIZE);
 

@@ -36,18 +36,19 @@ extern int g_enb_fd;
 extern ipc_handle ipcHndl_icsresp;
 
 int
-s1_init_ctx_resp_handler(char *msg)
+s1_init_ctx_resp_handler(InitiatingMessage_t *msg)
 {
 	struct proto_IE s1_ics_ies;
 	struct initctx_resp_Q_msg ics_resp;
 
 	/*****Message structure****/
 	log_msg(LOG_INFO, "Parse int ctx s1ap response message:--\n");
-	parse_IEs(msg+2, &s1_ics_ies, S1AP_INITIAL_CTX_RESP_CODE);
+	//parse_IEs(msg+2, &s1_ics_ies, S1AP_INITIAL_CTX_RESP_CODE);
+    convertToInitUeProtoIe(msg, &s1_ics_ies);
 
-	ics_resp.ue_idx = s1_ics_ies.data[0].mme_ue_s1ap_id;
-	ics_resp.transp_layer_addr = s1_ics_ies.data[2].erab.elements[0].su_res.transp_layer_addr;
-	ics_resp.gtp_teid = s1_ics_ies.data[2].erab.elements[0].su_res.gtp_teid;
+	ics_resp.ue_idx = s1_ics_ies.data[0].val.mme_ue_s1ap_id;
+	ics_resp.transp_layer_addr = s1_ics_ies.data[2].val.erab.elements[0].su_res.transp_layer_addr;
+	ics_resp.gtp_teid = s1_ics_ies.data[2].val.erab.elements[0].su_res.gtp_teid;
 
 	int i = write_ipc_channel(ipcHndl_icsresp, (char *)&ics_resp, S1AP_ICSRESP_STAGE7_BUF_SIZE);
 

@@ -50,13 +50,13 @@ s1_esm_resp_handler(struct proto_IE *s1_esm_resp_ies)
 
 	/*Create Q structure for stage 1 to MME.
 	  contains init UE information.*/
-	esm_resp.ue_idx = s1_esm_resp_ies->data[0].mme_ue_s1ap_id;
-	if(s1_esm_resp_ies->data[2].nas.header.message_type != NAS_SEC_MODE_COMPLETE)
+	esm_resp.ue_idx = s1_esm_resp_ies->data[0].val.mme_ue_s1ap_id;
+	if(s1_esm_resp_ies->data[2].val.nas.header.message_type != NAS_SEC_MODE_COMPLETE)
 		esm_resp.status = S1AP_SECMODE_FAILED;//Error in authentication
 	else
 		esm_resp.status = SUCCESS;
 
-	memcpy(&(esm_resp.apn), &(s1_esm_resp_ies->data[2].nas.elements[0].apn),
+	memcpy(&(esm_resp.apn), &(s1_esm_resp_ies->data[2].val.nas.elements[0].apn),
 		sizeof(struct apn_name));
 
 	int i = write_ipc_channel(ipcHndl_esmresp, (char *)&esm_resp, S1AP_ESMRESP_STAGE5_BUF_SIZE);
