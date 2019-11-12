@@ -52,12 +52,12 @@ s1_init_ue_handler(struct proto_IE *s1_init_ies, int enodeb_fd)
 	/*Create Q structure for stage 1 to MME.
 	  contains init UE information.*/
 	ue_info.enb_fd = enodeb_fd;
-	ue_info.criticality = s1_init_ies->procedureCode;
+	ue_info.criticality = s1_init_ies->criticality;
     for(int i = 0; i < s1_init_ies->no_of_IEs; i++)
     {
         switch(s1_init_ies->data[i].IE_type)
         {
-            case S1AP_IE_MME_UE_ID:
+            case S1AP_IE_ENB_UE_ID:
                 {
 	                ue_info.s1ap_enb_ue_id = s1_init_ies->data[i].val.enb_ue_s1ap_id;
                 }break;

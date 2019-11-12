@@ -52,14 +52,33 @@ s1_auth_resp_handler(struct proto_IE *s1_auth_resp_ies)
 
 	/*Create Q structure for stage 1 to MME.
 	  contains init UE information.*/
-	auth_resp.ue_idx = s1_auth_resp_ies->data[0].val.mme_ue_s1ap_id;
-	if(s1_auth_resp_ies->data[2].val.nas.header.message_type != NAS_AUTH_RESP)
-		auth_resp.status = S1AP_AUTH_FAILED;//Error in authentication
-	else
-		auth_resp.status = SUCCESS;
+    for(int i = 0; i < s1_auth_resp_ies->no_of_IEs; i++)
+    {
+        switch(s1_auth_resp_ies->data[i].IE_type)
+        {
+            case S1AP_IE_MME_UE_ID:
+                {
+	                auth_resp.ue_idx = s1_auth_resp_ies->data[i].val.mme_ue_s1ap_id;
+                }break;
+            case S1AP_IE_NAS_PDU:
+                {
+                    if(s1_auth_resp_ies->data[i].val.nas.header.message_type != NAS_AUTH_RESP)
+                    {
+                        auth_resp.status = S1AP_AUTH_FAILED;//Error in authentication
+                    }
+                    else
+                    {
+                        auth_resp.status = SUCCESS;
+                    }
 
-	memcpy(&(auth_resp.res), &(s1_auth_resp_ies->data[2].val.nas.elements[0].auth_resp),
-		sizeof(struct XRES));
+                    memcpy(&(auth_resp.res), 
+                           &(s1_auth_resp_ies->data[i].val.nas.elements[0].auth_resp),
+                           sizeof(struct XRES));
+                }break;
+            default:
+                log_msg(LOG_WARNING,"Unhandled IE");
+        }
+    }
 
 	//STIMER_GET_CURRENT_TP(g_attach_stats[s1_auth_resp_ies->data[1].enb_ue_s1ap_id].auth_to_mme);
 	write_ipc_channel(ipcHndl_authresp, (char *)&auth_resp, S1AP_AUTHRESP_STAGE3_BUF_SIZE);

@@ -573,7 +573,7 @@ UL_NAS_msg_handler(InitiatingMessage_t *msg, int enb_fd)
 	/*****Message structure***
 	*/
 	//parse_IEs(msg+2, &proto_ies, S1AP_UL_NAS_TX_MSG_CODE);
-    convertToInitUeProtoIe(msg, &proto_ies);
+    convertUplinkNasToProtoIe(msg, &proto_ies);
 
 	/*Check nas message type*/
 	//TODO: check through all proto IEs for which is nas
@@ -656,8 +656,20 @@ handle_s1ap_message(void *msg)
 int
 s1ap_mme_decode_successfull_outcome (SuccessfulOutcome_t* msg)
 {
-    log_msg(LOG_DEBUG,"successful outcome decode : TBD");
-    return 0;
+    log_msg(LOG_DEBUG,"successful outcome decode :");
+    log_msg(LOG_INFO, "proc code %d\n", msg->procedureCode);
+  switch (msg->procedureCode) {
+
+	case S1AP_INITIAL_CTX_RESP_CODE:
+		s1_init_ctx_resp_handler(msg);
+		break;
+	default:
+		log_msg(LOG_ERROR, "Unknown procedure code - %d\n",
+		         msg->procedureCode & 0x00FF);
+		break;
+	}
+	
+	return 0;
 }
 
 int
@@ -685,10 +697,6 @@ s1ap_mme_decode_initiating (InitiatingMessage_t *initiating_p, int enb_fd)
 		UL_NAS_msg_handler(initiating_p, enb_fd);
 		break;
 
-	case S1AP_INITIAL_CTX_RESP_CODE:
-		s1_init_ctx_resp_handler(initiating_p);
-		break;
-
 	case S1AP_UE_CTX_RELEASE_CODE:
 		s1_ctx_release_resp_handler(initiating_p);
 		break;
@@ -702,3 +710,265 @@ s1ap_mme_decode_initiating (InitiatingMessage_t *initiating_p, int enb_fd)
   //free(msg);
 	return 0;
 }
+
+int convertUplinkNasToProtoIe(InitiatingMessage_t *msg, struct proto_IE* proto_ies)
+{
+    proto_ies->procedureCode = msg->procedureCode;
+    proto_ies->criticality = msg->criticality;
+	int no_of_IEs = 0;
+
+    if(msg->value.present == InitiatingMessage__value_PR_UplinkNASTransport)
+    {
+        ProtocolIE_Container_129P33_t* protocolIes = &msg->value.choice.UplinkNASTransport.protocolIEs;
+        no_of_IEs = protocolIes->list.count;
+        proto_ies->no_of_IEs = no_of_IEs;
+
+        log_msg(LOG_INFO, "No of IEs = %d\n", no_of_IEs);
+        proto_ies->data = calloc(sizeof(struct proto_IE_data), no_of_IEs);
+        if(proto_ies->data == NULL)
+        {
+            log_msg(LOG_ERROR,"Malloc failed for protocol IE.");
+            return -1;
+        }
+		for (int i = 0; i < protocolIes->list.count; i++) {
+			UplinkNASTransport_IEs_t *ie_p;
+			ie_p = protocolIes->list.array[i];
+			switch(ie_p->id) {
+				case ProtocolIE_ID_id_eNB_UE_S1AP_ID:
+					{
+                        ENB_UE_S1AP_ID_t *s1apENBUES1APID_p = NULL;
+                        if(UplinkNASTransport_IEs__value_PR_ENB_UE_S1AP_ID == ie_p->value.present)
+                        {
+						    s1apENBUES1APID_p = &ie_p->value.choice.ENB_UE_S1AP_ID;
+                        }
+						
+                        if (s1apENBUES1APID_p == NULL) {
+							log_msg (LOG_ERROR, "Decoding of IE eNB_UE_S1AP_ID failed\n");
+							return -1;
+						}
+
+                        proto_ies->data[i].IE_type = S1AP_IE_ENB_UE_ID; 
+						memcpy(&proto_ies->data[i].val.enb_ue_s1ap_id, s1apENBUES1APID_p, sizeof(ENB_UE_S1AP_ID_t));
+						s1apENBUES1APID_p = NULL;
+					} break;
+				case ProtocolIE_ID_id_MME_UE_S1AP_ID:
+					{
+                        MME_UE_S1AP_ID_t *s1apMMEUES1APID_p = NULL;
+                        if(UplinkNASTransport_IEs__value_PR_MME_UE_S1AP_ID == ie_p->value.present)
+                        {
+						    s1apMMEUES1APID_p = &ie_p->value.choice.MME_UE_S1AP_ID;
+                        }
+						
+                        if (s1apMMEUES1APID_p == NULL) {
+							log_msg (LOG_ERROR, "Decoding of IE MME_UE_S1AP_ID failed\n");
+							return -1;
+						}
+
+                        proto_ies->data[i].IE_type = S1AP_IE_MME_UE_ID; 
+						memcpy(&proto_ies->data[i].val.mme_ue_s1ap_id, s1apMMEUES1APID_p, sizeof(MME_UE_S1AP_ID_t));
+						s1apMMEUES1APID_p = NULL;
+					} break;
+				case ProtocolIE_ID_id_NAS_PDU:
+					{
+                        NAS_PDU_t *s1apNASPDU_p = NULL;
+                        if(UplinkNASTransport_IEs__value_PR_NAS_PDU == ie_p->value.present)
+                        {
+						    s1apNASPDU_p = &ie_p->value.choice.NAS_PDU;
+                        }
+						
+                        if (s1apNASPDU_p == NULL) {
+							log_msg (LOG_ERROR, "Decoding of IE NAS PDU failed\n");
+							return -1;
+						}
+
+                        proto_ies->data[i].IE_type = S1AP_IE_NAS_PDU; 
+                        parse_nas_pdu((char*)s1apNASPDU_p->buf, s1apNASPDU_p->size, 
+                                       &proto_ies->data[i].val.nas, msg->procedureCode);
+						s1apNASPDU_p = NULL;
+					} break;
+				case ProtocolIE_ID_id_TAI:
+					{
+                        TAI_t *s1apTAI_p = NULL;
+                        if(UplinkNASTransport_IEs__value_PR_TAI == ie_p->value.present)
+                        {
+						    s1apTAI_p = &ie_p->value.choice.TAI;
+                        }
+						
+                        if (s1apTAI_p == NULL) {
+							log_msg (LOG_ERROR, "Decoding of IE TAI failed\n");
+							return -1;
+						}
+
+                        proto_ies->data[i].IE_type = S1AP_IE_TAI; 
+						memcpy(&proto_ies->data[i].val.tai.tac, s1apTAI_p->tAC.buf, s1apTAI_p->tAC.size);
+						memcpy(&proto_ies->data[i].val.tai.plmn_id, 
+                                s1apTAI_p->pLMNidentity.buf, s1apTAI_p->pLMNidentity.size);
+						s1apTAI_p = NULL;
+					} break;
+				case ProtocolIE_ID_id_EUTRAN_CGI:
+					{
+			            EUTRAN_CGI_t*	 s1apCGI_p = NULL;;
+                        if(UplinkNASTransport_IEs__value_PR_EUTRAN_CGI == ie_p->value.present)
+                        {
+						    s1apCGI_p = &ie_p->value.choice.EUTRAN_CGI;
+                        }
+						
+                        if (s1apCGI_p == NULL) {
+							log_msg (LOG_ERROR, "Decoding of IE CGI failed\n");
+							return -1;
+						}
+
+                        proto_ies->data[i].IE_type = S1AP_IE_UTRAN_CGI; 
+						memcpy(&proto_ies->data[i].val.utran_cgi.cell_id, 
+                               s1apCGI_p->cell_ID.buf, s1apCGI_p->cell_ID.size);
+						memcpy(&proto_ies->data[i].val.utran_cgi.plmn_id.idx, 
+                                s1apCGI_p->pLMNidentity.buf, s1apCGI_p->pLMNidentity.size);
+						s1apCGI_p = NULL;
+					} break;
+                default:
+                    {
+                        log_msg(LOG_WARNING, "Unhandled IE %d", ie_p->id);
+                    }
+			}
+		}
+     }
+
+    return 0;
+}
+
+int convertInitCtxRspToProtoIe(SuccessfulOutcome_t *msg, struct proto_IE* proto_ies)
+{
+    proto_ies->procedureCode = msg->procedureCode;
+    proto_ies->criticality = msg->criticality;
+	int no_of_IEs = 0;
+
+    if(msg->value.present == SuccessfulOutcome__value_PR_InitialContextSetupResponse)
+    {
+        ProtocolIE_Container_129P20_t* protocolIes 
+            = &msg->value.choice.InitialContextSetupResponse.protocolIEs;
+        no_of_IEs = protocolIes->list.count;
+        proto_ies->no_of_IEs = no_of_IEs;
+
+        log_msg(LOG_INFO, "No of IEs = %d\n", no_of_IEs);
+        proto_ies->data = calloc(sizeof(struct proto_IE_data), no_of_IEs);
+        if(proto_ies->data == NULL)
+        {
+            log_msg(LOG_ERROR,"Malloc failed for protocol IE.");
+            return -1;
+        }
+		for (int i = 0; i < protocolIes->list.count; i++) {
+			InitialContextSetupResponseIEs_t *ie_p;
+			ie_p = protocolIes->list.array[i];
+			switch(ie_p->id) {
+				case ProtocolIE_ID_id_eNB_UE_S1AP_ID:
+					{
+                        ENB_UE_S1AP_ID_t *s1apENBUES1APID_p = NULL;
+                        if(InitialContextSetupResponseIEs__value_PR_ENB_UE_S1AP_ID == ie_p->value.present)
+                        {
+						    s1apENBUES1APID_p = &ie_p->value.choice.ENB_UE_S1AP_ID;
+                        }
+						
+                        if (s1apENBUES1APID_p == NULL) {
+							log_msg (LOG_ERROR, "Decoding of IE eNB_UE_S1AP_ID failed\n");
+							return -1;
+						}
+
+                        proto_ies->data[i].IE_type = S1AP_IE_ENB_UE_ID; 
+						memcpy(&proto_ies->data[i].val.enb_ue_s1ap_id, s1apENBUES1APID_p, sizeof(ENB_UE_S1AP_ID_t));
+						s1apENBUES1APID_p = NULL;
+					} break;
+				case ProtocolIE_ID_id_MME_UE_S1AP_ID:
+					{
+                        MME_UE_S1AP_ID_t *s1apMMEUES1APID_p = NULL;
+                        if(InitialContextSetupResponseIEs__value_PR_MME_UE_S1AP_ID == ie_p->value.present)
+                        {
+						    s1apMMEUES1APID_p = &ie_p->value.choice.MME_UE_S1AP_ID;
+                        }
+						
+                        if (s1apMMEUES1APID_p == NULL) {
+							log_msg (LOG_ERROR, "Decoding of IE MME_UE_S1AP_ID failed\n");
+							return -1;
+						}
+
+                        proto_ies->data[i].IE_type = S1AP_IE_MME_UE_ID; 
+						memcpy(&proto_ies->data[i].val.mme_ue_s1ap_id, s1apMMEUES1APID_p, sizeof(MME_UE_S1AP_ID_t));
+						s1apMMEUES1APID_p = NULL;
+					} break;
+				case ProtocolIE_ID_id_E_RABSetupListCtxtSURes:
+					{
+                        E_RABSetupListCtxtSURes_t *s1apErabSetupList_p = NULL;
+                        if(InitialContextSetupResponseIEs__value_PR_E_RABSetupListCtxtSURes == ie_p->value.present)
+                        {
+						    s1apErabSetupList_p = &ie_p->value.choice.E_RABSetupListCtxtSURes;
+                        }
+						
+                        if (s1apErabSetupList_p == NULL) {
+							log_msg (LOG_ERROR, "Decoding of IE s1apErabSetupList failed\n");
+							return -1;
+						}
+
+                        proto_ies->data[i].IE_type = S1AP_ERAB_SETUP_CTX_SUR;
+                        proto_ies->data[i].val.erab.no_of_elements = s1apErabSetupList_p->list.count;
+                        proto_ies->data[i].val.erab.elements = calloc(sizeof(union eRAB_IE), 
+                                                                    s1apErabSetupList_p->list.count);
+                        if(proto_ies->data[i].val.erab.elements == NULL)
+                        {
+                            log_msg(LOG_ERROR,"Malloc failed for protocol IE: Erab elements.");
+                            break;;
+                        }
+                        for (int j = 0; 
+                             j < s1apErabSetupList_p->list.count; j++) 
+                        {
+                            E_RABSetupItemCtxtSUResIEs_t *ie_p;
+                            ie_p = (E_RABSetupItemCtxtSUResIEs_t*)s1apErabSetupList_p->list.array[j];
+                            switch(ie_p->id) {
+                                case ProtocolIE_ID_id_E_RABSetupItemCtxtSURes:
+                                    {
+                                        E_RABSetupItemCtxtSURes_t* s1apErabSetupItem_p = NULL;
+                                        if(E_RABSetupItemCtxtSUResIEs__value_PR_E_RABSetupItemCtxtSURes == ie_p->value.present)
+                                        {
+                                            s1apErabSetupItem_p = &ie_p->value.choice.E_RABSetupItemCtxtSURes;
+                                        }
+
+                                        if (s1apErabSetupItem_p == NULL) {
+                                            log_msg (LOG_ERROR, "Decoding of IE s1apErabSetupItem failed\n");
+                                            return -1;
+                                        }
+
+                                        proto_ies->data[i].val.erab.elements[j].su_res.eRAB_id 
+                                                 = (unsigned short)s1apErabSetupItem_p->e_RAB_ID;
+                                        memcpy(
+                                            &(proto_ies->data[i].val.erab.elements[j].su_res.gtp_teid),
+                                            s1apErabSetupItem_p->gTP_TEID.buf,
+                                            s1apErabSetupItem_p->gTP_TEID.size);
+                                        proto_ies->data[i].val.erab.elements[j].su_res.gtp_teid
+                                            = ntohl(proto_ies->data[i].val.erab.elements[j].su_res.gtp_teid);
+
+                                        memcpy(
+                                           &(proto_ies->data[i].val.erab.elements[j].su_res.transp_layer_addr),
+                                            s1apErabSetupItem_p->transportLayerAddress.buf,
+                                            s1apErabSetupItem_p->transportLayerAddress.size);
+                                        proto_ies->data[i].val.erab.elements[j].su_res.transp_layer_addr
+                                            = ntohl(proto_ies->data[i].val.erab.elements[j].su_res.transp_layer_addr);
+                                        s1apErabSetupItem_p = NULL;
+                                    }break;
+                                default:
+                                    {
+                                        log_msg(LOG_WARNING, "Unhandled List item %d", ie_p->id);
+                                    }
+                            }
+                        }
+
+						s1apErabSetupList_p = NULL;
+					} break;
+                default:
+                    {
+                        log_msg(LOG_WARNING, "Unhandled IE %d", ie_p->id);
+                    }
+			}
+		}
+     }
+
+    return 0;
+}
+
