@@ -36,6 +36,7 @@ parse_IEs(char *msg, struct proto_IE *proto_ies, unsigned short proc_code);
 int convertToInitUeProtoIe(InitiatingMessage_t *msg, struct proto_IE* proto_ies);
 int convertUplinkNasToProtoIe(InitiatingMessage_t *msg, struct proto_IE* proto_ies);
 int convertInitCtxRspToProtoIe(SuccessfulOutcome_t *msg, struct proto_IE* proto_ies);
+int convertUeCtxRelComplToProtoIe(SuccessfulOutcome_t *msg, struct proto_IE* proto_ies);
 int
 s1_setup_handler(InitiatingMessage_t *msg, int enb_fd);
 
@@ -76,7 +77,10 @@ int
 detach_stage1_handler(struct proto_IE *detach_ies, bool retransmit);
 
 int
-s1_ctx_release_resp_handler(InitiatingMessage_t *msg);
+s1_ctx_release_resp_handler(SuccessfulOutcome_t *msg);
+
+int
+s1_ctx_release_req_handler(InitiatingMessage_t *msg);
 
 int
 copyU16(unsigned char *buffer, uint32_t val);

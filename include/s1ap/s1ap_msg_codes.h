@@ -26,6 +26,7 @@
 #define S1AP_INITIAL_CTX_RESP_CODE 9
 
 #define S1AP_UE_CTX_RELEASE_CODE 23
+#define S1AP_UE_CTX_RELEASE_REQ_CODE 18
 
 /*S1AP Protocol IE types*/
 #define S1AP_IE_GLOBAL_ENB_ID 59
@@ -37,6 +38,7 @@
 #define S1AP_IE_REL_MME_CAPACITY 87
 
 #define S1AP_IE_MME_UE_ID 0
+#define S1AP_IE_CAUSE 2
 #define S1AP_IE_ENB_UE_ID 8
 #define S1AP_IE_NAS_PDU  26
 #define S1AP_IE_TAI  67
