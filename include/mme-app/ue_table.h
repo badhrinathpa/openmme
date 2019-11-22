@@ -67,9 +67,10 @@ enum ue_stages{
   DETACH_STAGE2_DS_DONE,
   DETACH_STAGE2,
   DETACH_DONE,
+  S1AP_HANDLE_MESSAGE_STAGE,
   UE_ERROR=200,
 };
-#define TOTAL_STAGES  11
+#define TOTAL_STAGES  15
 
 struct secinfo {
 	uint8_t int_key[NAS_INT_KEY_SIZE];

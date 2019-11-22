@@ -44,10 +44,12 @@ socklen_t g_client_addr_size;
 int g_Q_CSresp_fd;
 int g_Q_MBresp_fd;
 int g_Q_DSresp_fd;
+int g_Q_S11_Incoming_fd;
 
 pthread_t g_cs_tid;
 pthread_t g_mb_tid;
 pthread_t g_ds_tid;
+pthread_t g_s11_tid;
 
 pthread_mutex_t s11_net_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -66,6 +68,7 @@ init_s11_workers()
 	pthread_create(&g_cs_tid, &attr, &create_session_handler, NULL);
 	pthread_create(&g_mb_tid, &attr, &modify_bearer_handler, NULL);
 	pthread_create(&g_ds_tid, &attr, &delete_session_handler, NULL);
+	pthread_create(&g_s11_tid, &attr, &s11_out_msg_handler, NULL);
 
 	pthread_attr_destroy(&attr);
 	return 0;
@@ -125,6 +128,13 @@ init_s11_ipc()
 	g_Q_DSresp_fd = open_ipc_channel(S11_DTCHRES_STAGE2_QUEUE , IPC_WRITE);
 	if (g_Q_DSresp_fd == -1) {
 		log_msg(LOG_ERROR, "Error in opening Writer IPC channel:S11 DS Response\n");
+		pthread_exit(NULL);
+	}
+	
+    log_msg(LOG_INFO, "Connecting to mme-app S11 response queue\n");
+	g_Q_S11_Incoming_fd = open_ipc_channel(S11_RECV_RSP_STAGE_QUEUE , IPC_WRITE);
+	if (g_Q_S11_Incoming_fd == -1) {
+		log_msg(LOG_ERROR, "Error in opening Writer IPC channel for all Response\n");
 		pthread_exit(NULL);
 	}
 	log_msg(LOG_INFO, "DS response - mme-app IPC: Connected.\n");

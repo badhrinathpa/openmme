@@ -172,7 +172,20 @@ init_mme()
 
 	unlink(S1AP_CTXRELRESP_STAGE3_QUEUE);
 	create_ipc_channel(S1AP_CTXRELRESP_STAGE3_QUEUE);
-	return SUCCESS;
+	
+	unlink(S1AP_MME_QUEUE);
+	create_ipc_channel(S1AP_MME_QUEUE);
+   
+	unlink(S11_SEND_REQ_STAGE_QUEUE);
+	create_ipc_channel(S11_SEND_REQ_STAGE_QUEUE);
+   
+	unlink(S11_RECV_RSP_STAGE_QUEUE);
+	create_ipc_channel(S11_RECV_RSP_STAGE_QUEUE);
+   
+	unlink(S1AP_MME_TO_S1AP_QUEUE);
+	create_ipc_channel(S1AP_MME_TO_S1AP_QUEUE);
+   
+    return SUCCESS;
 }
 
 /**
@@ -201,6 +214,8 @@ init_stage_handlers()
 	pthread_create(&stage_tid[8], &attr, &detach_stage1_mme_handler, NULL);
 	pthread_create(&stage_tid[9], &attr, &detach_stage2_handler, NULL);
 	pthread_create(&stage_tid[10], &attr, &detach_stage3_handler, NULL);
+	pthread_create(&stage_tid[11], &attr, &s1ap_req_common_mme_handler, NULL);
+	pthread_create(&stage_tid[12], &attr, &s11_rsp_common_mme_handler, NULL);
 	pthread_attr_destroy(&attr);
 	return SUCCESS;
 }

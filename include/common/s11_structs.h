@@ -78,14 +78,14 @@ struct PAA {
         } ip_type;
 };
 
-struct Cause {
+struct gtp_cause {
 	unsigned char cause;
 	unsigned char data;
 };
 
 struct bearer_ctx {
 	unsigned char eps_bearer_id;
-	struct Cause cause;
+	struct gtp_cause cause;
 	struct fteid s1u_sgw_teid;
 	struct fteid s5s8_pgw_u_teid;
 };
@@ -98,7 +98,7 @@ struct s11_IE_header {
 };
 
 union s11_IE_data {
-	struct Cause cause;
+	struct gtp_cause cause;
 	struct fteid s11_sgw_fteid;
 	struct fteid s5s8_pgw_c_fteid;
 	struct PAA pdn_addr;

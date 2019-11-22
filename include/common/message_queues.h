@@ -89,6 +89,8 @@ Message queues used across MME, S1ap, S11, S6a
 #define S1AP_DTCHREQ_STAGE1_QUEUE  "/tmp/s1ap/s1ap_dtchreq_stage1_Q"
 
 #define S11_DTCHREQ_STAGE1_QUEUE   "/tmp/mme-app/s11_dtchreq_stage1_Q"
+#define S11_SEND_REQ_STAGE_QUEUE      "/tmp/mme-app/s11_req_stage_Q"
+#define S11_RECV_RSP_STAGE_QUEUE      "/tmp/mme-app/s11_resp_stage_Q"
 
 #define S6A_DTCHREQ_STAGE1_QUEUE  "/tmp/mme-app/s6a_dtchreq_stage1_Q"
 
@@ -110,4 +112,6 @@ Message queues used across MME, S1ap, S11, S6a
 
 /********* STAGE 3 DETACH END    ***************/
 
+#define S1AP_MME_QUEUE  "/tmp/s1ap/s1ap_mme_Q"
+#define S1AP_MME_TO_S1AP_QUEUE  "/tmp/s1ap/mme_to_s1ap_Q"
 #endif /*__MESSAGE_QUEUES_H*/

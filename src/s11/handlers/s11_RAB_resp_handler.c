@@ -28,36 +28,36 @@
 #include "message_queues.h"
 #include "s11.h"
 #include "s11_config.h"
-#include "detach_stage2_info.h"
+#include "s11_common_proc_info.h"
 
 /*Globals and externs*/
-extern int g_Q_DSresp_fd;
+extern int g_Q_S11_Incoming_fd;
 
 /*End : globals and externs*/
 
 int
-s11_DS_resp_handler(char *message)
+s11_RABR_resp_handler(char *message)
 {
-	struct s11_proto_IE s1_dsr_ies;
-	struct DS_resp_Q_msg dsr_info;
+	struct s11_proto_IE s1_rabr_ies;
+	struct s11_resp_Q_msg rabr_info;
 	struct gtpv2c_header *header = (struct gtpv2c_header*)message;
 
 	/*****Message structure****/
-	log_msg(LOG_INFO, "Parse S11 DS resp message\n");
-	parse_gtpv2c_IEs((char*)(header+1), ntohs(header->gtp.len), &s1_dsr_ies);
+	log_msg(LOG_INFO, "Parse S11 RABR resp message\n");
+	parse_gtpv2c_IEs((char*)(header+1), ntohs(header->gtp.len), &s1_rabr_ies);
 
 	//TODO : check cause for the result verification
 
 	/*Check whether has teid flag is set.
 	 * Also check whether this check is needed for DSR.
 	 * */
-	dsr_info.ue_idx = ntohl(header->teid.has_teid.teid);
+	rabr_info.IE_type = S11_RABR_RESP;
+	rabr_info.ue_idx = ntohl(header->teid.has_teid.teid);
 
-	/*Send CS response msg*/
-	write_ipc_channel(g_Q_DSresp_fd, (char *)&dsr_info,
-			S1AP_DTCHRES_STAGE2_BUF_SIZE);
-	log_msg(LOG_INFO, "Send DS resp to mme-app stage8.\n");
+	/*Send RABR response msg*/
+	write_ipc_channel(g_Q_S11_Incoming_fd, (char *)&rabr_info,
+			S11_COMM_RES_STAGE_BUF_SIZE);
+	log_msg(LOG_INFO, "Send RAB resp to mme-app .\n");
 
 	return SUCCESS;
 }
-

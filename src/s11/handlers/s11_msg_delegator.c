@@ -71,7 +71,7 @@ parse_bearer_ctx(struct bearer_ctx *bearer, char* data, short len)
 
 		switch(header->ie_type){
 		case S11_IE_CAUSE:
-			memcpy(&(bearer->cause), value, sizeof(struct Cause));
+			memcpy(&(bearer->cause), value, sizeof(struct gtp_cause));
 			break;
 
 		case S11_IE_FTEID_C:{
@@ -123,7 +123,7 @@ parse_gtpv2c_IEs(char *msg, int len, struct s11_proto_IE *proto_ies)
 
 		switch(ie->header.ie_type){
 		case S11_IE_CAUSE:
-			memcpy(&(ie->data.cause), data, sizeof(struct Cause));
+			memcpy(&(ie->data.cause), data, sizeof(struct gtp_cause));
 			break;
 
 		case S11_IE_FTEID_C:{
@@ -179,6 +179,10 @@ handle_s11_message(void *message)
 
 	case S11_GTP_DELETE_SESSION_RESP:
 		s11_DS_resp_handler(message);
+		break;
+
+	case S11_GTP_REL_ACCESS_BEARER_RESP:
+		s11_RABR_resp_handler(message);
 		break;
 
 	}

@@ -74,6 +74,8 @@ void* stage8_handler(void *);
 void* detach_stage1_mme_handler(void *);
 void* detach_stage2_handler(void *);
 void* detach_stage3_handler(void *);
+void* s1ap_req_common_mme_handler(void *);
+void* s11_rsp_common_mme_handler(void *);
 
 //for testing, delete it
 void

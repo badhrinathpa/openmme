@@ -33,6 +33,8 @@
 #define S11_GTP_CREATE_SESSION_RESP	33
 #define S11_GTP_MODIFY_BEARER_RESP	35
 #define S11_GTP_DELETE_SESSION_RESP	37
+#define S11_GTP_REL_ACCESS_BEARER_REQ	170
+#define S11_GTP_REL_ACCESS_BEARER_RESP	171
 
 /*GTPv2c IE message types*/
 #define S11_IE_CAUSE		2
@@ -61,10 +63,12 @@ void* create_session_handler(void *);
 void* modify_bearer_handler(void *);
 
 void* delete_session_handler(void *);
+void* s11_out_msg_handler(void *);
 
 int s11_CS_resp_handler(char *message);
 int s11_MB_resp_handler(char *message);
 int s11_DS_resp_handler(char *message);
+int s11_RABR_resp_handler(char *message);
 
 void
 bswap8_array(uint8_t *src, uint8_t *dest, uint32_t len);
