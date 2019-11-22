@@ -78,7 +78,7 @@ init_stage()
 static int
 process_rabr_resp()
 {
-	struct s11_resp_Q_msg *rabr_resp = (struct s11_resp_Q_msg *)rabr_resp;
+	struct s11_resp_Q_msg *rabr_resp = (struct s11_resp_Q_msg *)buf;
 	log_msg(LOG_INFO, "RABR resp for UE idx = %d\n", rabr_resp->ue_idx);
 
 	return rabr_resp->ue_idx;
@@ -118,6 +118,7 @@ post_ctx_rel_command(int ue_index)
 
     /*Create message to send to S1ap*/
 
+    req.IE_type = S1AP_CTX_REL_CMD;
     req.enb_fd = ue_entry->enb_fd;
     req.mme_s1ap_ue_id = ue_index;
     req.enb_s1ap_ue_id = ue_entry->s1ap_enb_ue_id;

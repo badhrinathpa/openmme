@@ -109,7 +109,7 @@ static int
 ctx_rel_req_processing()
 {
 	struct s1ap_common_req_Q_msg *ctxRelreq =
-			(struct s1ap_common_req_Q_msg *) ctxRelreq;
+			(struct s1ap_common_req_Q_msg *) s1ap_comm_req;
 	struct UE_info *ue_entry = GET_UE_ENTRY(ctxRelreq->ue_idx);
 
 	log_msg(LOG_INFO, "Ctx Release request received for ue %d\n",
