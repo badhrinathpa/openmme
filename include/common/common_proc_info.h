@@ -23,12 +23,22 @@
 #include "s1ap_ie.h"
 #include "s11_structs.h"
 
+enum s1ap_cn_domain
+{
+    CN_DOMAIN_PS,
+    CN_DOMAIN_CS,
+    CN_DOMAIN_NONE
+};
+
 struct s1ap_common_req_Q_msg {
     int             IE_type; 
 	int ue_idx;
 	int enb_fd;
 	int enb_s1ap_ue_id;
 	int mme_s1ap_ue_id;
+    enum s1ap_cn_domain cn_domain;
+    unsigned char imsi[BINARY_IMSI_LEN];
+	struct TAI      tai;//TODO: will be list of 16 TAI's for UE.
 	s1apCause_t cause;
 };
 
@@ -46,6 +56,7 @@ enum s1ap_common_req_type
 {
     S1AP_CTX_REL_REQ,
     S1AP_CTX_REL_CMD,
+    S1AP_PAGING_REQ,
     S1AP_REQ_UNKNOWN
 };
 

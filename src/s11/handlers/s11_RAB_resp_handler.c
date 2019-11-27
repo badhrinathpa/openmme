@@ -28,7 +28,7 @@
 #include "message_queues.h"
 #include "s11.h"
 #include "s11_config.h"
-#include "s11_common_proc_info.h"
+#include "common_proc_info.h"
 
 /*Globals and externs*/
 extern int g_Q_S11_Incoming_fd;

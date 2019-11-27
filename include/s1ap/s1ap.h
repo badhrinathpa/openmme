@@ -26,7 +26,7 @@
 #include "InitiatingMessage.h"
 #include "SuccessfulOutcome.h"
 #include "UnsuccessfulOutcome.h"
-#include "s11_common_proc_info.h"
+#include "common_proc_info.h"
 
 int
 s1_init_ctx_resp_handler(SuccessfulOutcome_t *msg);
@@ -51,6 +51,10 @@ void
 handle_s1ap_message(void *message);
 
 int s1ap_mme_encode_ue_context_release_command(
+        struct s1ap_common_req_Q_msg *s1apPDU, 
+        uint8_t **buffer, uint32_t *length);
+
+int s1ap_mme_encode_paging_request(
         struct s1ap_common_req_Q_msg *s1apPDU, 
         uint8_t **buffer, uint32_t *length);
 

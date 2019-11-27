@@ -28,7 +28,7 @@
 #include "ipc_api.h"
 #include "gtpv2c.h"
 #include "gtpv2c_ie.h"
-#include "s11_common_proc_info.h"
+#include "common_proc_info.h"
 
 /************************************************************************
 Current file : Stage 1 handler.

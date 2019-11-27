@@ -29,7 +29,7 @@
 #include "s1ap.h"
 #include "s1ap_config.h"
 #include "main.h"
-#include "s11_common_proc_info.h"
+#include "common_proc_info.h"
 
 /****Globals and externs ***/
 

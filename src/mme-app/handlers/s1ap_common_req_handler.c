@@ -25,7 +25,7 @@
 #include "err_codes.h"
 #include "message_queues.h"
 #include "ipc_api.h"
-#include "s11_common_proc_info.h"
+#include "common_proc_info.h"
 
 
 /************************************************************************

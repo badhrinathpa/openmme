@@ -27,7 +27,7 @@
 #include "ipc_api.h"
 #include "stage1_s6a_msg.h"
 #include "stage2_info.h"
-#include "s11_common_proc_info.h"
+#include "common_proc_info.h"
 
 /************************************************************************
 Current file : detach stage 2 handler.

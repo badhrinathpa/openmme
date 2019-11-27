@@ -336,6 +336,7 @@ typedef struct nas_pdu_header {
 
 /****Information elements presentations **/
 #define BINARY_IMSI_LEN 8 /*same as packet capture. TODO: Write macros*/
+#define BCD_IMSI_STR_LEN 15
 
 /*36.413 - 9.2.1.38*/
 struct CGI {
